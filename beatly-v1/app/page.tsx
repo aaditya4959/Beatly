@@ -1,13 +1,21 @@
+import Features from "@/components/Features";
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import HowItWorks from "@/components/HowItWorks";
+import Redirect from "@/components/Redirect";
 
-import Image from "next/image";
-import Appbar from "./Components/Appbar";
-import { SessionProvider } from "next-auth/react";
-import {getServerSession} from "next-auth";
+
 
 export default function Home() {
   return (
+    <div> 
+      <Redirect/>
+      <Hero/>
+      <Features/>
+      <HowItWorks/>
+    </div>
     
-      <Appbar/>
+      
     
     
   );
