@@ -6,50 +6,68 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThumbsUp, ThumbsDown, Play, Music, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import prisma from "../lib/db";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 interface VideoItem {
   id: string;
   title: string;
   thumbnail: string;
-  votes: number;
+  upvotes: number;
   url: string;
 }
 
 const Dashboard = () => {
+
+  const session = useSession();
   const [videoUrl, setVideoUrl] = useState("");
   const [videoId, setVideoId] = useState<string | null>(null);
-  const [videoQueue, setVideoQueue] = useState<VideoItem[]>([
-    {
-      id: "dQw4w9WgXcQ",
-      title: "Rick Astley - Never Gonna Give You Up",
-      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-      votes: 15,
-      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    },
-    {
-      id: "9bZkp7q19f0",
-      title: "PSY - Gangnam Style",
-      thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg",
-      votes: 10,
-      url: "https://www.youtube.com/watch?v=9bZkp7q19f0",
-    },
-    {
-      id: "kJQP7kiw5Fk",
-      title: "Luis Fonsi - Despacito ft. Daddy Yankee",
-      thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg",
-      votes: 7,
-      url: "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
-    },
-  ]);
+  const [videoQueue, setVideoQueue] = useState<VideoItem[]>([]);
   const [nowPlaying, setNowPlaying] = useState<VideoItem | null>(null);
 
+  const queueRefreshRate = 10 *1000;
+
   useEffect(() => {
-    // Set the first video in the queue as now playing if none is playing
-    if (!nowPlaying && videoQueue.length > 0) {
-      setNowPlaying(videoQueue[0]);
-      setVideoQueue(videoQueue.slice(1));
-    }
-  }, [nowPlaying, videoQueue]);
+    const fetchStreams = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/streams/my");
+        
+          
+        // Ensuring that the response has streams.
+        if(response.data?.streams?.length){
+          // Setting up the queue
+          const formattedStreams: VideoItem[] = response.data.streams.map((stream: any) => ({
+            id: stream.extractedId, // Extracted ID for embedding
+            title: stream.title,
+            thumbnail: stream.smallImg,
+            upvotes: stream.upvotes, 
+            url: stream.url,
+          }));
+
+          setVideoQueue(formattedStreams);
+
+
+          // If no video is playing, set the first one as nowPlaying
+          if(!nowPlaying){
+            setNowPlaying(formattedStreams[0]);
+          }
+          
+
+          // Remove the first video from the queue if it's playing
+          setVideoQueue((prevQueue) => prevQueue.slice(1));
+        }
+      } catch (error) {
+        console.error("Error fetching streams:", error);
+      }
+    };
+  
+    fetchStreams();
+    const interval = setInterval(() => {
+
+    },queueRefreshRate);
+    
+  }, []); // Only runs on mount
 
   const extractVideoId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -78,7 +96,7 @@ const Dashboard = () => {
         id: videoId,
         title: `YouTube Video ${videoId}`, // In real app, get actual title from API
         thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-        votes: 0,
+        upvotes: 0,
         url: videoUrl,
       };
       
@@ -95,10 +113,10 @@ const Dashboard = () => {
     setVideoQueue(
       videoQueue.map((video) => {
         if (video.id === id) {
-          return { ...video, votes: video.votes + vote };
+          return { ...video, votes: video.upvotes + vote };
         }
         return video;
-      }).sort((a, b) => b.votes - a.votes)
+      }).sort((a, b) => b.upvotes - a.upvotes)
     );
   };
 
@@ -235,7 +253,7 @@ const Dashboard = () => {
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm truncate">{video.title}</h4>
                           <div className="flex items-center mt-2">
-                            <span className="text-lg font-bold mr-2">{video.votes}</span>
+                            <span className="text-lg font-bold mr-2">{video.upvotes}</span>
                             <div className="flex gap-1">
                               <Button
                                 size="icon"

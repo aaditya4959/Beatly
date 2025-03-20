@@ -34,10 +34,10 @@ const Header = () => {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="relative w-8 h-8 flex items-center justify-center bg-primary rounded-full">
+          <div className="relative w-8 h-8 flex items-center justify-center rounded-full bg-purple-600">
             <Music className="w-4 h-4 text-white" />
           </div>
-          <span className="text-lg font-bold">Beatly</span>
+          <span className="text-lg text-purple-600 font-bold">Beatly</span>
         </Link>
 
         {/* Desktop Navigation */}
