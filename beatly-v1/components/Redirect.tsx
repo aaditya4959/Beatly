@@ -10,13 +10,16 @@ import { useEffect } from "react";
 // This component check that whether the user is logged in or not and redirects the pagge accordingly.
 
  export default function Redirect(){
-    const session = useSession();
-    const router = useRouter();
+     const { status } = useSession();
+     const router = useRouter();
 
     useEffect(() => {
-        if(session.status == "authenticated"){
+        if(status == "authenticated"){
             router.push("/dashboard");
         }
-    },[session])
+        else if(status == 'unauthenticated'){
+            router.replace("/");
+        }
+    },[status, router])
     return null;
  }
