@@ -2,6 +2,9 @@ import prisma from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod"
+import dotenv from "dotenv";
+
+dotenv.config();
 
 
 const DownvoteSchema = z.object({

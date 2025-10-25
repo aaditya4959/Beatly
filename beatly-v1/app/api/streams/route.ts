@@ -7,6 +7,9 @@ import youtubesearchapi from "youtube-search-api";
 import Stream from "stream";
 //@ts-ignore
 import youtubeURL from "youtube-url";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 
 
